@@ -4055,7 +4055,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_JWPF_B03B-JWPF-SK-R_1x03_P2.00mm_Vertical"
+		(property "Footprint" "Connector_JST:JST_XA_B03B-XASK-1-A_1x03_P2.50mm_Vertical"
 			(at 50.8 40.64 0)
 			(effects
 				(font
