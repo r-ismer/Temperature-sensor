@@ -262,8 +262,8 @@
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
-			(property "Reference" "J"
-				(at -2.54 16.51 0)
+			(property "Reference" "J2"
+				(at 5.334 16.51 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -272,15 +272,15 @@
 				)
 			)
 			(property "Value" "Conn_ARM_JTAG_SWD_10"
-				(at -2.54 13.97 0)
+				(at 25.908 14.224 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(justify right bottom)
+					(justify right)
 				)
 			)
-			(property "Footprint" ""
+			(property "Footprint" "Connector_PinHeader_1.27mm:PinHeader_2x05_P1.27mm_Vertical"
 				(at 0 0 0)
 				(effects
 					(font
@@ -519,7 +519,7 @@
 						)
 					)
 				)
-				(pin open_collector line
+				(pin bidirectional line
 					(at 12.7 7.62 180)
 					(length 2.54)
 					(name "~{RESET}"
