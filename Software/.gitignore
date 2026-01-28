@@ -1,0 +1,10 @@
+#VSCode specific ignore rules
+.vscode/
+
+# Build artifacts
+/build/
+*.o
+*.elf
+*.bin
+*.hex
+*.map
