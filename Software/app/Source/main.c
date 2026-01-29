@@ -103,6 +103,38 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
+    // Send a message Over I2C
+    uint8_t i2c_address = 0x44;
+    uint8_t i2c_command = 0xFD;
+
+    // Send the command to the I2C device
+    HAL_I2C_Master_Transmit(&hi2c1, i2c_address << 1, &i2c_command, 1, HAL_MAX_DELAY);
+
+    // Wait 10 ms
+    HAL_Delay(10);
+
+    // Read 6 bytes of data from the I2C device
+    uint8_t i2c_data[6];
+    HAL_I2C_Master_Receive(&hi2c1, i2c_address << 1, i2c_data, 6, HAL_MAX_DELAY);
+
+    // Get the termperature value from the received data  
+    int16_t temp_raw = (i2c_data[0] << 8) | i2c_data[1];
+    int32_t temperature = -45 + 175 * (int32_t) temp_raw / 65535;
+
+    // Get the humidity value from the received data  
+    int16_t hum_raw = (i2c_data[3] << 8) | i2c_data[4];
+    int32_t humidity = -6 + 125 * (int32_t) hum_raw / 65535;  
+
+    // Read the serial number
+    i2c_command = 0x89;  
+    HAL_I2C_Master_Transmit(&hi2c1, i2c_address << 1, &i2c_command, 1, HAL_MAX_DELAY);
+    uint8_t serial_number[6];
+    HAL_Delay(10);
+    HAL_I2C_Master_Receive(&hi2c1, i2c_address << 1, serial_number, 6, HAL_MAX_DELAY);
+    uint32_t serial = (serial_number[0] << 24) | (serial_number[1] << 16) | (serial_number[3] << 8) | serial_number[4];
+
+    volatile int i = 0;
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
