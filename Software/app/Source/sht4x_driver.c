@@ -57,7 +57,9 @@ static const uint8_t sht4x_serial_number_command = 0x89;
 static const uint8_t sht4x_soft_reset_command = 0x94;
 
 // Delay 
-#define SHT4X_MEASUREMENT_DELAY_MS            10u
+#define SHT4X_MEASUREMENT_DELAY_MS            (10u)
+#define SHT4X_HEATER_MEASUREMENT_DELAY_SHORT  (110u)
+#define SHT4X_HEATER_MEASUREMENT_DELAY_LONG   (1010u)
 
 // Conversion constants
 #define SHT4X_TEMPERATURE_MULTIPLIER          (1750u)
@@ -260,7 +262,7 @@ status_e sht4x_read_temperature_humidity(sht4x_handle_t* i_p_handle,
         // Check status
         if (r_status == STATUS_OK)
         {
-            // Wait for measurement to complete (max 15ms for high precision)
+            // Wait for measurement to complete
             p_handle->delay_function(SHT4X_MEASUREMENT_DELAY_MS);
 
             // Receive the measurement data
@@ -370,8 +372,17 @@ status_e sht4x_read_temperature_humidity_heater(sht4x_handle_t* i_p_handle,
         // Check status
         if (r_status == STATUS_OK)
         {
-            // Wait for measurement to complete (max 15ms for high precision)
-            p_handle->delay_function(SHT4X_MEASUREMENT_DELAY_MS);
+            // Wait for measurement to complete depending on heater duration
+            if (i_heater_duration == SHT4x_HEATER_DURATION_0_1SEC)
+            {
+                // Wait for a short duration
+                p_handle->delay_function(SHT4X_HEATER_MEASUREMENT_DELAY_SHORT);
+            }
+            else
+            {
+                // Wait for a long duration
+                p_handle->delay_function(SHT4X_HEATER_MEASUREMENT_DELAY_LONG);
+            }
 
             // Receive the measurement data
             r_status = p_handle->receive_function(sht4x_addresses[p_handle->address], data, 6u);

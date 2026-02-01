@@ -8,6 +8,7 @@
 //                                               Include                                                    *
 // **********************************************************************************************************
 #include "main.h"
+#include "sht4x_driver.h"
 
 // **********************************************************************************************************
 //                                               Defines                                                    *
@@ -20,6 +21,10 @@
 // **********************************************************************************************************
 //                                       Private prototype functions                                        *
 // **********************************************************************************************************
+
+status_e i2c_send_function(uint8_t i_address, uint8_t* i_p_data, size_t i_size);
+status_e i2c_receive_function(uint8_t i_address, uint8_t* o_p_data, size_t i_size);
+void delay_function(uint32_t i_delay_ms);
 
 // **********************************************************************************************************
 //                                            Public fuctions                                               *
@@ -41,7 +46,35 @@ int main(void)
     // Main loop
     while (1)
     {
+        // Get the microcontroller to sleep until an interrupt occurs
+        HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 
+        sht4x_handle_t* sht4x_handle;
+        status_e status;
+        int16_t temperature;
+        uint16_t humidity;
+        // Initialize the SHT4x sensor
+        sht4x_handle = sht4x_init(SHT4x_A, i2c_send_function, i2c_receive_function, delay_function);
+        if (sht4x_handle != NULL)
+        {
+            // Read temperature and humidity
+            status = sht4x_read_temperature_humidity(sht4x_handle, SHT4x_PRECISION_HIGH, &temperature, &humidity);
+            if (status == STATUS_OK)
+            {
+                // Successfully read temperature and humidity
+                // Process the temperature and humidity values as needed
+            }
+            else
+            {
+                // Error reading temperature and humidity
+                error_handler();
+            }
+        }
+        else
+        {
+            // Error initializing the SHT4x sensor
+            error_handler();
+        }
     }
 }
 
@@ -76,4 +109,26 @@ void assert_failed(uint8_t* file, uint32_t line)
         // Break here for debugger
         __asm("bkpt");
     }
+}
+
+status_e i2c_send_function(uint8_t i_address, uint8_t* i_p_data, size_t i_size)
+{
+    // Implement the I2C send functionality here
+    HAL_I2C_Master_Transmit(&ge_hw_i2c_handle, i_address << 1, i_p_data, i_size, HAL_MAX_DELAY);
+
+    return STATUS_OK;
+}
+
+status_e i2c_receive_function(uint8_t i_address, uint8_t* o_p_data, size_t i_size)
+{
+    // Implement the I2C receive functionality here
+    HAL_I2C_Master_Receive(&ge_hw_i2c_handle, i_address << 1, o_p_data, i_size, HAL_MAX_DELAY);
+
+    return STATUS_OK;
+}
+
+void delay_function(uint32_t i_delay_ms)
+{
+    // Implement the delay functionality here
+    HAL_Delay(i_delay_ms);
 }

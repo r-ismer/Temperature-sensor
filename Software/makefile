@@ -5,6 +5,7 @@ SIZE=arm-none-eabi-size
 JLINK_PATH ?= "C:\Program Files\SEGGER\JLink_V896"
 
 PROJECT_ROOT=.
+BUILD_DIR=$(PROJECT_ROOT)/_Build
 
 INCLUDE_PATHS=\
 	-I$(PROJECT_ROOT)/app/Include \
@@ -13,38 +14,38 @@ INCLUDE_PATHS=\
 	-I$(PROJECT_ROOT)/stm32f030/peripherals/Include \
 	-I$(PROJECT_ROOT)/stm32f030/peripherals/Include/Legacy \
 
-CFLAGS=$(INCLUDE_PATHS) -Wall -O1 -mcpu=cortex-m0 -mthumb -g3 -ffunction-sections -fdata-sections
-CFLAGS+=-DSTM32F030x6 -DUSE_HAL_DRIVER -DDEBUG
+SOURCES=\
+	$(wildcard ./app/Source/*.c) \
+	$(wildcard ./bsp/Source/*.c) \
+	$(wildcard ./stm32f030/core/Source/*.c) \
+	$(wildcard ./stm32f030/peripherals/Source/*.c)
 
-LDFLAGS=-mcpu=cortex-m0 -mthumb -Wl,--gc-sections -Wl,-Map=temperature_sensor.map -T$(PROJECT_ROOT)/bsp/Loader/STM32F030F4PX_FLASH.ld
+OBJECTS_PATH=_Build
 
-SOURCES=$(wildcard ./stm32f030/peripherals/Source/*.c) \
-		$(wildcard ./stm32f030/core/Source/*.c) \
-		$(wildcard ./bsp/Source/*.c) \
-		$(wildcard ./app/Source/*.c)
-OBJECTS=$(SOURCES:.c=.o)
+CFLAGS=$(INCLUDE_PATHS) -Wall -Os -mcpu=cortex-m0 -mthumb -g3 -ffunction-sections -fdata-sections -DSTM32F030x6 -DUSE_HAL_DRIVER -DDEBUG
+LDFLAGS=-mcpu=cortex-m0 -mthumb -Wl,--gc-sections -Wl,-Map=$(BUILD_DIR)/temperature_sensor.map -T$(PROJECT_ROOT)/bsp/Loader/STM32F030F4PX_FLASH.ld
 
-STARTUP_FILE=stm32f030/core/Startup/startup_stm32f030f4px.s
+OBJECTS=$(patsubst %.c,$(OBJECTS_PATH)/%.o,$(SOURCES))
 
-all: temperature_sensor.elf
-	$(SIZE) temperature_sensor.elf
+STARTUP_FILE=stm32f030\core\Startup\startup_stm32f030f4px.s
 
-%.o: %.c
+
+# When make or make all is called, first create the build folder if it does ot exist, then build all .o files in the Build folder, finally link them to crteate the final .elf and .map files
+all: $(BUILD_DIR) $(OBJECTS) $(BUILD_DIR)/temperature_sensor.elf
+
+# Create build directory
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+$(BUILD_DIR)/temperature_sensor.elf: $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) $(STARTUP_FILE) -o $@
+	$(SIZE) $@
+
+# Compile each .c file to .o file in the Build folder
+$(OBJECTS_PATH)/%.o: %.c
+	@if not exist "$(dir $@)" mkdir "$(subst /,\,$(dir $@))"
 	$(CC) $(CFLAGS) -c $< -o $@
 
-temperature_sensor.elf: $(OBJECTS)
-	$(CC) $(LDFLAGS) $(STARTUP_FILE) $^ -o $@
-
 clean:
-	rm -rf $(OBJECTS) temperature_sensor.elf temperature_sensor.map
-
-JLINK_DEVICE=STM32F030F4
-JLINK_SPEED=4000
-
-program: temperature_sensor.elf
-	"$(JLINK_PATH)\jrun.exe" -device $(JLINK_DEVICE) -speed $(JLINK_SPEED) -if SWD temperature_sensor.elf
-
-erase:
-	"$(JLINK_PATH)\jrun.exe" -device $(JLINK_DEVICE) -speed $(JLINK_SPEED) -if SWD -erase
-
-.PHONY: program erase
+	@if exist "$(BUILD_DIR)" rmdir /s /q "$(subst /,\,$(BUILD_DIR))"
+	@mkdir "$(subst /,\,$(BUILD_DIR))"
