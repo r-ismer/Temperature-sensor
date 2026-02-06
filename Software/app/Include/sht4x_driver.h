@@ -130,7 +130,7 @@ status_e sht4x_read_temperature_humidity(sht4x_handle_t* i_p_handle,
 // Function name    : sht4x_read_temperature_humidity_heater                                                *
 // Description      : Read temperature and humidity from the sensor with heater enabled.                    *
 // Argument         : (sht4x_handle_t*) i_p_handle: Pointer to the sensor handle structure                  *
-//                  : (sht4x_heater_power_e) i_heater_power: Heater power level                            *
+//                  : (sht4x_heater_power_e) i_heater_power: Heater power level                             *
 //                  : (sht4x_heater_duration_e) i_heater_duration: Heater duration                          *
 //                  : (int16_t*) o_p_temperature: Pointer to the temperature value (in 0.1 degree Celsius)  *
 //                  : (uint16_t*) o_p_humidity: Pointer to the humidity value (in 0.1 %RH)                  *

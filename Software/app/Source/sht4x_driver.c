@@ -394,18 +394,18 @@ status_e sht4x_read_temperature_humidity_heater(sht4x_handle_t* i_p_handle,
                 if (sht4x_crc8_check(&data[0], data[2]) && sht4x_crc8_check(&data[3], data[5]))
                 { 
                     // Combine raw temperature and humidity bytes
-                    raw_temperature = ((uint32_t)data[0] << 8u) | ((uint32_t)data[1]);
-                    raw_humidity    = ((uint32_t)data[3] << 8u) | ((uint32_t)data[4]);
+                    raw_temperature = ((uint32_t) data[0] << 8u) | ((uint32_t) data[1]);
+                    raw_humidity    = ((uint32_t) data[3] << 8u) | ((uint32_t) data[4]);
 
                     // Calculate temperature in 0.1 degree Celsius
-                    temp = ((int32_t)(raw_temperature * SHT4X_TEMPERATURE_MULTIPLIER) >> 16u) - 
+                    temp = ((int32_t) (raw_temperature * SHT4X_TEMPERATURE_MULTIPLIER) >> 16u) - 
                            SHT4X_TEMPERATURE_OFFSET;
 
                     // Store temperature value
                     *o_p_temperature = (int16_t) temp;
 
                     // Calculate humidity in 0.1 %RH
-                    hum = ((int32_t)(raw_humidity * SHT4X_HUMIDITY_MULTIPLIER) >> 16u) - SHT4X_HUMIDITY_OFFSET;
+                    hum = ((int32_t) (raw_humidity * SHT4X_HUMIDITY_MULTIPLIER) >> 16u) - SHT4X_HUMIDITY_OFFSET;
 
                     // Crop humidity to 0-1000 (0-100.0 %RH)
                     if (hum > 1000u)
@@ -477,14 +477,14 @@ static bool_e sht4x_crc8_check(uint8_t* i_p_data, uint8_t i_crc)
     polynomial = SHT4X_CRC8_POLYNOMIAL;
 
     // Process each byte
-    for (byte_index = 0u; byte_index < 2u; byte_index++)
+    for (byte_index = 0u ; byte_index < 2u ; byte_index++)
     {
         // Get the current byte
         data_byte = i_p_data[byte_index];
         crc ^= data_byte;
 
         // Process each bit
-        for (bit_index = 0u; bit_index < 8u; bit_index++)
+        for (bit_index = 0u ; bit_index < 8u ; bit_index++)
         {
             // Shift left and apply polynomial if needed
             if (crc & 0x80u)
