@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f0xx_it.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -68,14 +69,10 @@
   */
 void NMI_Handler(void)
 {
-  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
-
-  /* USER CODE END NonMaskableInt_IRQn 0 */
-  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-   while (1)
+  while (1)
   {
+    __asm("bkpt");
   }
-  /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
 /**
@@ -83,13 +80,9 @@ void NMI_Handler(void)
   */
 void HardFault_Handler(void)
 {
-  /* USER CODE BEGIN HardFault_IRQn 0 */
-
-  /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
-    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-    /* USER CODE END W1_HardFault_IRQn 0 */
+    __asm("bkpt");
   }
 }
 
@@ -98,12 +91,10 @@ void HardFault_Handler(void)
   */
 void SVC_Handler(void)
 {
-  /* USER CODE BEGIN SVC_IRQn 0 */
-
-  /* USER CODE END SVC_IRQn 0 */
-  /* USER CODE BEGIN SVC_IRQn 1 */
-
-  /* USER CODE END SVC_IRQn 1 */
+  while (1)
+  {
+    __asm("bkpt");
+  }
 }
 
 /**
@@ -111,12 +102,10 @@ void SVC_Handler(void)
   */
 void PendSV_Handler(void)
 {
-  /* USER CODE BEGIN PendSV_IRQn 0 */
-
-  /* USER CODE END PendSV_IRQn 0 */
-  /* USER CODE BEGIN PendSV_IRQn 1 */
-
-  /* USER CODE END PendSV_IRQn 1 */
+  while (1)
+  {
+    __asm("bkpt");
+  }
 }
 
 /**
@@ -124,13 +113,27 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-  /* USER CODE BEGIN SysTick_IRQn 0 */
-
-  /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
-  /* USER CODE BEGIN SysTick_IRQn 1 */
+}
 
-  /* USER CODE END SysTick_IRQn 1 */
+/**
+  * @brief This function handles timer interrupts.
+  */
+void TIM_IT_IRQ_HANDLER(void)
+{
+  // Enable back SysTick
+  HAL_ResumeTick();
+
+  // Call HAL dedicated handler
+  HAL_TIM_IRQHandler(&ge_hw_tim_handle);
+}
+
+/**
+  * @brief This function handles the perdiod elapsed callback.
+  */
+void TIM_UP_CALLBACK(TIM_HandleTypeDef* i_p_handle)
+{
+  // Wake up the main process and do nothing more
 }
 
 /******************************************************************************/

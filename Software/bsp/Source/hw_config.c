@@ -19,6 +19,7 @@
 // Global hw handle(s)
 I2C_HandleTypeDef ge_hw_i2c_handle;
 UART_HandleTypeDef ge_hw_uart_handle;
+TIM_HandleTypeDef ge_hw_tim_handle;
 
 // **********************************************************************************************************
 //                                       Private fuctions prototype                                         *
@@ -40,6 +41,14 @@ static void rcc_config(void);
 static void gpio_config(void);
 
 // **********************************************************************************************************
+// Function name    : tim_config                                                                            *
+// Description      : Timer configuration function.                                                         *
+// Argument         : None                                                                                  *
+// Return value     : None                                                                                  *
+// **********************************************************************************************************
+static void tim_config(void);
+
+// **********************************************************************************************************
 // Function name    : i2c_config                                                                            *
 // Description      : I2C configuration function.                                                           *
 // Argument         : None                                                                                  *
@@ -56,6 +65,14 @@ static void i2c_config(void);
 static void uart_config(void);
 
 // **********************************************************************************************************
+// Function name    : nvic_config                                                                           *
+// Description      : NVIC configuration function.                                                          *
+// Argument         : None                                                                                  *
+// Return value     : None                                                                                  *
+// **********************************************************************************************************
+static void nvic_config(void);
+
+// **********************************************************************************************************
 //                                            Public fuctions                                               *
 // **********************************************************************************************************
 // **********************************************************************************************************
@@ -70,11 +87,17 @@ void hw_config(void)
     // Configure GPIO
     gpio_config();
 
+    // Configure timer
+    tim_config();
+
     // Configure I2C
     i2c_config();
 
     // Configure UART
     uart_config();
+
+    // Configure NVIC
+    nvic_config();
 }
 
 // **********************************************************************************************************   
@@ -125,6 +148,9 @@ static void rcc_config(void)
         // Catch error
         error_handler();
     }
+
+    // Enable PWR clock for sleep mode functionality
+    __HAL_RCC_PWR_CLK_ENABLE();
 }
 
 // **********************************************************************************************************
@@ -144,10 +170,10 @@ static void gpio_config(void)
     gpio_init_struct.Pull = GPIO_NOPULL;
     gpio_init_struct.Speed = GPIO_SPEED_FREQ_HIGH;
     gpio_init_struct.Alternate = GPIO_AF4_I2C1;
-    gpio_init_struct.Pin = TEMP_HUM_SWDIO_PIN;
-    HAL_GPIO_Init(TEMP_HUM_SWDIO_PORT, &gpio_init_struct);
-    gpio_init_struct.Pin = TEMP_HUM_SWCLK_PIN;
-    HAL_GPIO_Init(TEMP_HUM_SWCLK_PORT, &gpio_init_struct);
+    gpio_init_struct.Pin = TEMP_HUM_SDA_PIN;
+    HAL_GPIO_Init(TEMP_HUM_SDA_PORT, &gpio_init_struct);
+    gpio_init_struct.Pin = TEMP_HUM_SCL_PIN;
+    HAL_GPIO_Init(TEMP_HUM_SCL_PORT, &gpio_init_struct);
     
     // UART communication
     gpio_init_struct.Mode = GPIO_MODE_AF_PP;
@@ -158,6 +184,56 @@ static void gpio_config(void)
     HAL_GPIO_Init(COM_UART_TX_PORT, &gpio_init_struct);
     gpio_init_struct.Pin = COM_UART_RX_PIN; 
     HAL_GPIO_Init(COM_UART_RX_PORT, &gpio_init_struct);
+}
+
+// **********************************************************************************************************
+// Function name    : tim_config                                                                            *
+// Description      : Timer configuration function.                                                         *
+// Argument         : None                                                                                  *
+// Return value     : None                                                                                  *
+// **********************************************************************************************************
+static void tim_config(void)
+{
+    // Variable(s) delcaration
+    TIM_ClockConfigTypeDef clk_config = {0};
+    TIM_MasterConfigTypeDef master_config = {0};
+
+    // Enable timer clock
+    __HAL_RCC_TIM1_CLK_ENABLE();
+
+    // Initialize the timer handle
+    ge_hw_tim_handle.Instance = TIM;
+    ge_hw_tim_handle.Init.Prescaler = TIM_PRESCALER;
+    ge_hw_tim_handle.Init.CounterMode = TIM_COUNTERMODE_UP;
+    ge_hw_tim_handle.Init.Period = TIM_PERIOD;
+    ge_hw_tim_handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    ge_hw_tim_handle.Init.RepetitionCounter = 0u;
+    ge_hw_tim_handle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_OK != HAL_TIM_Base_Init(&ge_hw_tim_handle))
+    {
+        // Catch error
+        error_handler();
+    }
+
+    // Configure the clock source
+    clk_config.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if (HAL_OK != HAL_TIM_ConfigClockSource(&ge_hw_tim_handle, &clk_config))
+    {
+        // Catch error
+        error_handler();
+    }
+
+    // Configure the master mode
+    master_config.MasterOutputTrigger = TIM_TRGO_RESET;
+    master_config.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_OK != HAL_TIMEx_MasterConfigSynchronization(&ge_hw_tim_handle, &master_config))
+    {
+        // Catch error
+        error_handler();
+    }
+
+    // Freeze the timer in debug mode
+    __HAL_FREEZE_TIM1_DBGMCU();
 }
 
 // **********************************************************************************************************
@@ -225,4 +301,17 @@ static void uart_config(void)
         // Catch error
         error_handler();
     }
+}
+
+// **********************************************************************************************************
+// Function name    : nvic_config                                                                           *
+// Description      : NVIC configuration function.                                                          *
+// Argument         : None                                                                                  *
+// Return value     : None                                                                                  *
+// **********************************************************************************************************
+static void nvic_config(void)
+{
+    // Enable IRQ for timer
+    HAL_NVIC_SetPriority(TIM_IT_IRQ, 2, 0);
+    HAL_NVIC_EnableIRQ(TIM_IT_IRQ);
 }

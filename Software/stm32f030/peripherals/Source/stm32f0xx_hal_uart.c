@@ -3311,7 +3311,7 @@ HAL_StatusTypeDef UART_CheckIdleState(UART_HandleTypeDef *huart)
   * @param huart     UART handle.
   * @param Flag      Specifies the UART flag to check
   * @param Status    The actual Flag status (SET or RESET)
-  * @param Tickstart Tick start value
+  * @param Tickstart Tick start values
   * @param Timeout   Timeout duration
   * @retval HAL status
   */

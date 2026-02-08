@@ -85,7 +85,7 @@ void task(void)
     message[3] = (uint8_t) ((humidity >> 8) & 0x00FF);
 
     // Send the temperature and humdity over UART
-    HAL_UART_Transmit(&ge_hw_uart_handle, message, 4, 0);
+    HAL_UART_Transmit(&ge_hw_uart_handle, message, 4, 100);
 }
 
 // **********************************************************************************************************

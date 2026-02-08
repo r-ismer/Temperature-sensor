@@ -39,11 +39,19 @@ int main(void)
     // Initialize the task
     task_init();
 
+    // Start the timer
+    HAL_TIM_Base_Start_IT(&ge_hw_tim_handle);
+
     // Main loop
     while (1)
     {
-        HAL_Delay(1000);
+        // Disable SysTick
+        HAL_SuspendTick();
 
+        // Sleep
+        HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+
+        // The timer has times out and we can now run the task
         task();
     }
 }
