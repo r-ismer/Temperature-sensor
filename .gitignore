@@ -44,3 +44,6 @@ fp-info-cache
 *.drl
 *.gbrjob
 *.zip
+
+# FreeCad backup files
+*.FCBak
