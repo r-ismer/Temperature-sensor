@@ -2,8 +2,6 @@ CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
 SIZE=arm-none-eabi-size
 
-JLINK_PATH ?= "C:\Program Files\SEGGER\JLink_V896"
-
 PROJECT_ROOT=.
 BUILD_DIR=$(PROJECT_ROOT)/_Build
 
