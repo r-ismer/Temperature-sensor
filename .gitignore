@@ -47,3 +47,8 @@ fp-info-cache
 
 # FreeCad backup files
 *.FCBak
+*.stl
+
+# 3D printer files
+*.3mf
+*.gcode
